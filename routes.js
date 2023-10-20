@@ -96,11 +96,11 @@ router.post("/:id/add-reservation/", async function (req, res, next) {
 
 
 /** Handle searching for a customer */
-
+//TODO: Can consolidate this route with Homepage '/' route
 router.get("/search/results/", async function (req, res, next) {
   const search = req.query.search;
   const customers = await Customer.searchCustomers(search);
-  //TODO: why does 'for...in' work in HTML when it's on an array?
+
   return res.render("search_results.html", { customers });
 });
 
