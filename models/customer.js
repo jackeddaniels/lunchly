@@ -28,6 +28,7 @@ class Customer {
        FROM customers
        ORDER BY last_name, first_name`,
     );
+
     return results.rows.map(c => new Customer(c));
   }
 
@@ -92,12 +93,14 @@ class Customer {
   }
 
   /** return customer's full name */
+
   fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
 
-  static async searchUsers(search_term) {
+  /** search customers for search term input */
 
+  static async searchCustomers(search_term) {
     const results = await db.query(
       `SELECT id,
        first_name AS "firstName",
@@ -105,14 +108,34 @@ class Customer {
        phone,
        notes
        FROM customers
-       WHERE first_name = $1
+       WHERE CONCAT (first_name,' ', last_name) ILIKE $1
+       OR first_name ILIKE $1
+       OR last_name ILIKE $1
        ORDER BY last_name, first_name`,
-       [search_term]
+      [`%${search_term}%`]
     );
+
     return results.rows.map(c => new Customer(c));
   }
 
+  /** return top 10 customers by # of reservations */
+  static async findTopTen() {
+    const results = await db.query(
+      `SELECT customers.id,
+       first_name AS "firstName",
+       last_name  AS "lastName",
+       phone,
+       customers.notes,
+       COUNT(reservations.id)
+       FROM customers
+       JOIN reservations ON customers.id = reservations.customer_id
+       GROUP BY customers.id
+       ORDER BY COUNT(reservations.id) DESC
+       LIMIT 10`
+    );
 
+    return results.rows.map(c => new Customer(c));
+  }
 }
 
 module.exports = Customer;

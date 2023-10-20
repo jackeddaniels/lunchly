@@ -14,12 +14,14 @@ const router = new express.Router();
 
 router.get("/", async function (req, res, next) {
   const customers = await Customer.all();
+
   return res.render("customer_list.html", { customers });
 });
 
 /** Form to add a new customer. */
 
 router.get("/add/", async function (req, res, next) {
+
   return res.render("customer_new_form.html");
 });
 
@@ -51,7 +53,7 @@ router.get("/:id/", async function (req, res, next) {
 router.get("/:id/edit/", async function (req, res, next) {
   const customer = await Customer.get(req.params.id);
 
-  res.render("customer_edit_form.html", { customer });
+  return res.render("customer_edit_form.html", { customer });
 });
 
 /** Handle editing a customer. */
@@ -96,12 +98,19 @@ router.post("/:id/add-reservation/", async function (req, res, next) {
 /** Handle searching for a customer */
 
 router.get("/search/results/", async function (req, res, next) {
-
   const search = req.query.search;
-  const customers = await Customer.searchUsers();
-
+  const customers = await Customer.searchCustomers(search);
+  //TODO: why does 'for...in' work in HTML when it's on an array?
   return res.render("search_results.html", { customers });
 });
+
+/** Handle displaying top 10 customers */
+
+router.get("/top/ten/", async function (req, res, next) {
+  const topTen = await Customer.findTopTen();
+
+  return res.render("top_ten.html", { topTen });
+})
 
 module.exports = router;
 
